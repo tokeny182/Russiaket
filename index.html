@@ -3,97 +3,66 @@
 <head>
   <meta charset="UTF-8">
   <title>Russiaket</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #f4f4f4;
-    }
-    header {
-      background: #333;
-      color: #fff;
-      padding: 10px;
-      text-align: center;
-    }
-    main {
-      padding: 20px;
-    }
-    .ad-slot {
-      display: none;
-      background: #ffeeba;
-      border: 1px solid #f0ad4e;
-      padding: 10px;
-      margin: 10px 0;
-      text-align: center;
-    }
-    .house-ad {
-      font-weight: bold;
-      color: #333;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <!-- Header -->
   <header>
-    <h1>Welcome to Russiaket</h1>
-    <p>The quiz game with ads everywhere!</p>
+    <h1>Russiaket</h1>
+    <p>The quiz game with unskippable ads everywhere</p>
   </header>
 
+  <!-- Main content -->
   <main>
-    <p>Game content goes here. Create your quiz, join rooms, and play!</p>
+    <section id="game-area">
+      <h2>Game Area</h2>
+      <p>Here’s where your quiz questions and answers will appear.</p>
+      <button>Start Game</button>
+    </section>
 
-    <!-- Ad containers -->
+    <!-- Inline ad slots -->
     <div id="ad-top" class="ad-slot"></div>
     <div id="ad-bottom" class="ad-slot"></div>
     <div id="ad-sidebar" class="ad-slot"></div>
   </main>
 
+  <!-- Fullscreen overlay ad -->
+  <div id="ad-overlay">
+    <div class="ad-content">
+      <h2>Advertisement</h2>
+      <p>This is an unskippable ad, just like YouTube.</p>
+      <div class="timer">Ad ends in <span id="ad-timer">30</span> seconds</div>
+    </div>
+  </div>
+
+  <!-- Script -->
   <script>
     class AdScheduler {
       constructor() {
         this.intervalMs = 5000;   // every 5 seconds
         this.durationMs = 30000;  // lasts 30 seconds
-        this.maxConcurrent = 2;
-        this.slots = ['ad-top', 'ad-bottom', 'ad-sidebar'];
-        this.active = [];
       }
 
       start() {
-        setInterval(() => this.tick(), this.intervalMs);
+        setInterval(() => this.showOverlayAd(), this.intervalMs);
       }
 
-      tick() {
-        const now = Date.now();
-        // Remove expired ads
-        this.active = this.active.filter(e => e.endAt > now);
+      showOverlayAd() {
+        const overlay = document.getElementById('ad-overlay');
+        const timerEl = document.getElementById('ad-timer');
+        let remaining = this.durationMs / 1000;
 
-        if (this.active.length >= this.maxConcurrent) return;
+        overlay.style.display = 'block';
+        timerEl.textContent = remaining;
 
-        // Pick a slot not currently used
-        const used = new Set(this.active.map(a => a.slot));
-        const slot = this.slots.find(s => !used.has(s)) || this.slots[0];
-
-        const event = {
-          slot,
-          endAt: now + this.durationMs
-        };
-        this.active.push(event);
-
-        this.showAd(slot);
-        setTimeout(() => this.hideAd(slot), this.durationMs);
-      }
-
-      showAd(slot) {
-        const el = document.getElementById(slot);
-        if (el) {
-          el.style.display = 'block';
-          el.innerHTML = `<div class="house-ad">[Ad content here]</div>`;
-        }
-      }
-
-      hideAd(slot) {
-        const el = document.getElementById(slot);
-        if (el) el.style.display = 'none';
+        const countdown = setInterval(() => {
+          remaining--;
+          timerEl.textContent = remaining;
+          if (remaining <= 0) {
+            clearInterval(countdown);
+            overlay.style.display = 'none';
+          }
+        }, 1000);
       }
     }
 
