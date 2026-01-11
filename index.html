@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Russiaket</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f4f4f4;
+    }
+    header {
+      background: #333;
+      color: #fff;
+      padding: 10px;
+      text-align: center;
+    }
+    main {
+      padding: 20px;
+    }
+    .ad-slot {
+      display: none;
+      background: #ffeeba;
+      border: 1px solid #f0ad4e;
+      padding: 10px;
+      margin: 10px 0;
+      text-align: center;
+    }
+    .house-ad {
+      font-weight: bold;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Welcome to Russiaket</h1>
+    <p>The quiz game with ads everywhere!</p>
+  </header>
+
+  <main>
+    <p>Game content goes here. Create your quiz, join rooms, and play!</p>
+
+    <!-- Ad containers -->
+    <div id="ad-top" class="ad-slot"></div>
+    <div id="ad-bottom" class="ad-slot"></div>
+    <div id="ad-sidebar" class="ad-slot"></div>
+  </main>
+
+  <script>
+    class AdScheduler {
+      constructor() {
+        this.intervalMs = 5000;   // every 5 seconds
+        this.durationMs = 30000;  // lasts 30 seconds
+        this.maxConcurrent = 2;
+        this.slots = ['ad-top', 'ad-bottom', 'ad-sidebar'];
+        this.active = [];
+      }
+
+      start() {
+        setInterval(() => this.tick(), this.intervalMs);
+      }
+
+      tick() {
+        const now = Date.now();
+        // Remove expired ads
+        this.active = this.active.filter(e => e.endAt > now);
+
+        if (this.active.length >= this.maxConcurrent) return;
+
+        // Pick a slot not currently used
+        const used = new Set(this.active.map(a => a.slot));
+        const slot = this.slots.find(s => !used.has(s)) || this.slots[0];
+
+        const event = {
+          slot,
+          endAt: now + this.durationMs
+        };
+        this.active.push(event);
+
+        this.showAd(slot);
+        setTimeout(() => this.hideAd(slot), this.durationMs);
+      }
+
+      showAd(slot) {
+        const el = document.getElementById(slot);
+        if (el) {
+          el.style.display = 'block';
+          el.innerHTML = `<div class="house-ad">[Ad content here]</div>`;
+        }
+      }
+
+      hideAd(slot) {
+        const el = document.getElementById(slot);
+        if (el) el.style.display = 'none';
+      }
+    }
+
+    const scheduler = new AdScheduler();
+    scheduler.start();
+  </script>
+</body>
+</html>
