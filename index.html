@@ -6,24 +6,20 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Header -->
   <header>
     <h1>Russiaket</h1>
-    <p>The quiz game with unskippable ads everywhere</p>
+    <p>The quiz game with 100 unskippable ads</p>
   </header>
 
-  <!-- Main content -->
   <main>
     <section id="game-area">
       <h2>Game Area</h2>
-      <p>Here’s where your quiz questions and answers will appear.</p>
+      <p>Quiz questions will appear here.</p>
       <button>Start Game</button>
     </section>
 
-    <!-- Inline ad slots -->
-    <div id="ad-top" class="ad-slot"></div>
-    <div id="ad-bottom" class="ad-slot"></div>
-    <div id="ad-sidebar" class="ad-slot"></div>
+    <!-- Dynamic ad slots will be injected here -->
+    <div id="ads-container"></div>
   </main>
 
   <!-- Fullscreen overlay ad -->
@@ -35,16 +31,52 @@
     </div>
   </div>
 
-  <!-- Script -->
   <script>
+    // Generate 100 ad slots dynamically
+    const adsContainer = document.getElementById('ads-container');
+    for (let i = 1; i <= 100; i++) {
+      const div = document.createElement('div');
+      div.id = `ad-slot-${i}`;
+      div.className = 'ad-slot';
+      div.innerHTML = `<div class="house-ad">[Ad #${i}] Placeholder</div>`;
+      adsContainer.appendChild(div);
+    }
+
     class AdScheduler {
       constructor() {
         this.intervalMs = 5000;   // every 5 seconds
         this.durationMs = 30000;  // lasts 30 seconds
+        this.totalAds = 100;
+        this.currentAd = 1;
       }
 
       start() {
-        setInterval(() => this.showOverlayAd(), this.intervalMs);
+        setInterval(() => this.showNextAd(), this.intervalMs);
+      }
+
+      showNextAd() {
+        // Hide all ads first
+        for (let i = 1; i <= this.totalAds; i++) {
+          document.getElementById(`ad-slot-${i}`).style.display = 'none';
+        }
+
+        // Show the next ad slot
+        const slot = document.getElementById(`ad-slot-${this.currentAd}`);
+        if (slot) {
+          slot.style.display = 'block';
+          setTimeout(() => {
+            slot.style.display = 'none';
+          }, this.durationMs);
+        }
+
+        // Cycle through ads
+        this.currentAd++;
+        if (this.currentAd > this.totalAds) {
+          this.currentAd = 1;
+        }
+
+        // Also trigger overlay ad
+        this.showOverlayAd();
       }
 
       showOverlayAd() {
